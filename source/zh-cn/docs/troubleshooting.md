@@ -1,18 +1,19 @@
 ---
-title: 问题解答
+title: 故障排除
 ---
-在使用 Hexo 时，您可能会遇到一些问题，下列的常见问题解答可能会对您有所帮助。如果您在这里找不到解答，可以在 [GitHub](https://github.com/hexojs/hexo/issues) 或 [Google Group](https://groups.google.com/group/hexo) 上提问。
+
+在使用 Hexo 时，您可能会遇到一些问题，下列的常见问题解答可能会对您有所帮助。 如果您在这里找不到解答，可以在 [GitHub](https://github.com/hexojs/hexo/issues) 或 [Google Group](https://groups.google.com/group/hexo) 上提问。
 
 ## YAML 解析错误
 
-``` plain
+```plain
 JS-YAML: incomplete explicit mapping pair; a key node is missed at line 18, column 29:
       last_updated: Last updated: %s
 ```
 
-如果 YAML 字符串中包含冒号（`:`）的话，请加上引号。
+如果字符串包含冒号，则用引号将其括起来。
 
-``` plain
+```plain
 JS-YAML: bad indentation of a mapping entry at line 18, column 31:
       last_updated:"Last updated: %s"
 ```
@@ -23,23 +24,21 @@ JS-YAML: bad indentation of a mapping entry at line 18, column 31:
 
 ## EMFILE 错误
 
-``` plain
+```plain
 Error: EMFILE, too many open files
 ```
 
-虽然 Node.js 有非阻塞 I/O，同步 I/O 的数量仍被系统所限制，在生成大量静态文件的时候，您可能会碰到 EMFILE 错误，您可以尝试提高同步 I/O 的限制数量来解决此问题。
+虽然 Node.js 有非阻塞 I/O，同步 I/O 的数量仍被系统所限制，在生成大量静态文件的时候，您可能会碰到 EMFILE 错误，您可以尝试提高同步 I/O 的限制数量来解决此问题。 在生成大量静态文件的时候，您可能会碰到 EMFILE 错误。 您可以尝试提高同步 I/O 的限制数量来解决此问题。
 
-``` bash
+```bash
 $ ulimit -n 10000
 ```
-
-（这一命令只对Linux系统有效）
 
 **Error: cannot modify limit**
 
 如果遇到以下错误：
 
-``` bash
+```bash
 $ ulimit -n 10000
 ulimit: open files: cannot modify limit: Operation not permitted
 ```
@@ -50,31 +49,47 @@ ulimit: open files: cannot modify limit: Operation not permitted
 
 1. 在 `/etc/security/limits.conf` 中增加以下一行：
 
-  ```
-  * - nofile 10000
+```
+* - nofile 10000
 
-  # '*' applies to all users and '-' set both soft and hard limits
-  ```
+# '*' applies to all users and '-' set both soft and hard limits
+```
 
-  * 上述设置在某些情况下可能不适用，请确保 `/etc/pam.d/login` 和 `/etc/pam.d/lightdm` 有以下一行(如果这些文件不存在，请忽略此步骤)：
+- 上述设置在某些情况下可能不适用，请确保 "/etc/pam.d/login" 和 "/etc/pam.d/lightdm" 中有以下一行。 (如果这些文件不存在，请忽略此步骤)
 
-  ```
-  session required pam_limits.so
-  ```
+```
+session required pam_limits.so
+```
 
-2. 如果你使用的是 [基于systemd](https://en.wikipedia.org/wiki/Systemd#Adoption) 的发行版，systemd 可能会覆盖 `limits.conf`。如果想要在 systemd 中设置限制，请在 `/etc/systemd/system.conf` 和 `/etc/systemd/user.conf` 中添加以下一行：
+2. 如果你使用的是 [基于systemd](https://en.wikipedia.org/wiki/Systemd#Adoption) 的发行版，systemd 可能会覆盖 `limits.conf`。 如果想要在 systemd 中设置限制，请在 `/etc/systemd/system.conf` 和 `/etc/systemd/user.conf` 中添加以下一行：
 
-  ```
-  DefaultLimitNOFILE=10000
-  ```
+```
+DefaultLimitNOFILE=10000
+```
 
 3. 重启
 
+## 进程内存溢出
+
+当您在生成过程中遇到此错误时：
+
+```
+FATAL ERROR: CALL_AND_RETRY_LAST Allocation failed - process out of memory
+```
+
+通过更改 `hexo-cli` 的第一行来增加 Node.js 堆内存大小（`which hexo` 用于查找文件）。
+
+```
+#!/usr/bin/env node --max_old_space_size=8192
+```
+
+[生成大型博客时内存不足 Issue hexojs/hexo#1735](https://github.com/hexojs/hexo/issues/1735)
+
 ## Git 部署问题
 
-### RPC failed
+### RPC 失败
 
-``` plain
+```plain
 error: RPC failed; result=22, HTTP code = 403
 
 fatal: 'username.github.io' does not appear to be a git repository
@@ -84,27 +99,38 @@ fatal: 'username.github.io' does not appear to be a git repository
 
 ### Error: ENOENT: no such file or directory
 
-如果你遇到了这个错误，有可能是你的文件名、分类或者标签的名字混淆了大写和小写，你可以尝试检查每一个标签和分类的名称，是否大小写一致来修复这一问题。
+如果您遇到像 `Error: ENOENT: no such file or directory` 之类的错误，这可能是由于您的标签、分类或文件名中混合了大写和小写字母。 Git 不能自动合并此更改，所以它会中断自动分支。
+
+要解决这个问题，请试试
+
+1. 检查每个标签和类别的大小写，并确保它们是相同的。
+1. 提交变更
+1. 清洁和构建：`./node_modules/.bin/hexo clean && ./node_modules/.bin/hexo generate`
+1. 手动复制公共文件夹到桌面
+1. 将分支从主分支切换到本地部署分支
+1. 从桌面复制公共文件夹的内容到部署分支
+1. 提交。 您应该看到您可以手动解决的任何合并冲突。
+1. 切换回主分支并正常部署： `./node_modules/.bin/hexo deploy`
 
 ## 服务器问题
 
-``` plain
+```plain
 Error: listen EADDRINUSE
 ```
 
-您可能同时开启两个 Hexo 服务器，或者有其他应用程序正在占用相同的端口，请尝试修改 `port` 参数，或是在启动 Hexo 服务器时加上 `-p` 选项。
+您可能同时开启两个 Hexo 服务器，或者有其他应用程序正在占用相同的端口。 请尝试修改 `port` 参数，或是在启动 Hexo 服务器时加上 `-p` 选项。
 
-``` bash
+```bash
 $ hexo server -p 5000
 ```
 
 ## 插件安装问题
 
-``` plain
+```plain
 npm ERR! node-waf configure build
 ```
 
-当您尝试安装以 C/C++ 或其他非 JavaScript 语言所编写的插件时，可能会遇到此类问题，请确认您已经在电脑上安装相对应的编译器。
+当您尝试安装以 C/C++ 或其他非 JavaScript 语言所编写的插件时，可能会遇到此类问题。 请确认您已经在电脑上安装相对应的编译器。
 
 ## DTrace 错误 （Mac OS X）
 
@@ -122,20 +148,20 @@ $ npm install hexo --no-optional
 
 参考 [#1326](https://github.com/hexojs/hexo/issues/1326#issuecomment-113871796)
 
-## 在 Jade 或 Swig 遍历资料
+## 在 Jade 或 Swig 遍历数据
 
-Hexo 使用 [Warehouse] 存储资料，它不是一般数组所以必须先进行类型转型才能遍历。
+Hexo 使用 [Warehouse][] 存储数据。 它不是一般数组所以必须先进行类型转型才能遍历。
 
 ```
 {% for post in site.posts.toArray() %}
 {% endfor %}
 ```
 
-## 资料没有更新
+## 数据没有更新
 
-有时资料可能没有被更新，或是生成的文件与修改前的相同，您可以尝试清除缓存并再执行一次。
+有些数据无法更新，或者新生成的文件与上次版本相同。 清理缓存并重试。
 
-``` bash
+```bash
 $ hexo clean
 ```
 
@@ -146,15 +172,14 @@ $ hexo clean
 ```json
 {
   "hexo": {
-    "version": "3.9.0"
+    "version": "3.2.2"
   }
 }
 ```
 
-## 转义（Escape）内容
+## 转义内容
 
-Hexo 使用 [Nunjucks] 来解析文章（旧版本使用 [Swig]，两者语法类似），内容若包含 `{{ }}` 或 `{% %}` 可能导致解析错误，您可以用 [`raw`](/zh-cn/docs/tag-plugins#Raw) 标签包裹，单反引号 ```` `{{ }}` ```` 或 三反引号 来避免潜在问题发生。
-此外，Nunjucks 标签也可以通过渲染器的选项（如果支持的话）、[API](/zh-cn/api/renderer#禁用-Nunjucks-标签) 或 [front-matter](/zh-cn/docs/front-matter) 来禁用。
+Hexo 使用 [Nunjucks][] 来解析文章（旧版本使用 [Swig][]，两者语法类似）。 内容若包含 `{{ }}` 或 `{% %}` 可能导致解析错误。 您可以使用 [`raw`](/docs/tag-plugins#Raw) 标记插件、单反引号 `` `{{ }}` `` 或三反引号对其进行包裹，从而跳过解析过程。 此外，Nunjucks 标签也可以通过渲染器的选项（如果支持的话）、[API](/zh-cn/api/renderer#禁用-Nunjucks-标签) 或 [front-matter](/zh-cn/docs/front-matter) 来禁用。
 
 ```
 {% raw %}
@@ -170,7 +195,7 @@ Hello {{ world }}
 
 ## ENOSPC 错误 （Linux）
 
-运行 `$ hexo server` 命令有时会返回这样的错误：
+在执行 `hexo server` 后返回如下错误：
 
 ```
 Error: watch ENOSPC ...
@@ -184,28 +209,22 @@ $ echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo
 
 这将会提高你能监视的文件数量。
 
-[Warehouse]: https://github.com/hexojs/warehouse
-[Swig]: https://node-swig.github.io/swig-templates/
-[Nunjucks]: https://mozilla.github.io/nunjucks/
-
 ## EMPERM Error (Windows Subsystem for Linux)
 
-在执行 `hexo server` 后返回如下错误：
+运行 `$ hexo server` 命令有时会返回这样的错误：
 
 ```
 Error: watch /path/to/hexo/theme/ EMPERM
 ```
 
-这是由于你使用的 WSL 版本不支持监听文件系统改动。 最新版的 WSL 已经解决了这一问题。
-
-您也仍然可以通过先使用 `hexo g` 生成文件然后将其作为静态服务器运行来从 WSL 环境运行服务器：
+这是由于你使用的 WSL 版本不支持监听文件系统改动。 因此，Hexo 服务器的实时更新功能不可用。 您也仍然可以通过先使用 `hexo g` 生成文件然后将其作为静态服务器运行来从 WSL 环境运行服务器：
 
 ```sh
 $ hexo generate
 $ hexo server -s
 ```
 
-关于 WSL 的这一 Issue 请前往 https://github.com/Microsoft/BashOnWindows/issues/216 查看。目前这一问题已经得到了解决。
+这是 [一个已知的 BashOnWindows 问题](https://github.com/Microsoft/BashOnWindows/issues/216)，2016 年 8 月 15 日，Windows 团队表示他们将解决这个问题。 您可以在 [该问题的 UserVoice 建议页面](https://wpdev.uservoice.com/forums/266908-command-prompt-console-bash-on-ubuntu-on-windo/suggestions/13469097-support-for-filesystem-watchers-like-inotify) 获取进度更新并鼓励他们优先解决这个问题。
 
 ## 模板渲染错误
 
@@ -216,7 +235,36 @@ FATAL Something's wrong. Maybe you can find the solution here: http://hexo.io/do
 Template render error: (unknown path)
 ```
 
-一种可能的原因是你的文件中存在一些不可被识别的字符，比如不可见的零宽度字符。
+可能的原因：
+
+- 一种可能的原因是你的文件中存在一些不可被识别的字符，比如不可见的零宽度字符。
+- 不正确使用或限制 [标签插件](/docs/tag-plugins)
+
+  - 块式标签插件的内容被包围在 `{% endplugin_name %}` 中
+
+  ```
+  # Incorrect
+  {% codeblock %}
+  fn()
+  {% codeblock %}
+
+  # Incorrect
+  {% codeblock %}
+  fn()
+
+  # Correct
+  {% codeblock %}
+  fn()
+  {% endcodeblock %}
+  ```
+
+  - 在标签插件中有类似于 Nunjucks 的语法，例如 [`{% raw %} {# {% endraw %}`](https://mozilla.github.io/nunjucks/templating.html#comments)。 此示例的一个解决方法是使用 [triple backtick](/docs/tag-plugins#Backtick-Code-Block)。 [转义内容](/docs/troubleshooting#Escape-Contents) 部分有更多详细信息。
+
+  ```
+  {% codeblock lang:bash %}
+  Size of array is ${#ARRAY}
+  {% endcodeblock %}
+  ```
 
 ## YAMLException (Issue [#4917](https://github.com/hexojs/hexo/issues/4917))
 
@@ -231,9 +279,15 @@ YAMLException: Specified list of YAML types (or a single Type object) contains a
 
 ```sh
 $ npm install js-yaml@latest
-# 如果您使用 yarn 作为包管理器，请运行下面这个命令：
+```
+
+或者
+
+```sh
 $ yarn add js-yaml@latest
 ```
+
+如果您使用 `yarn`。
 
 [Warehouse]: https://github.com/hexojs/warehouse
 [Swig]: https://node-swig.github.io/swig-templates/
