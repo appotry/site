@@ -21,10 +21,10 @@ You can use multiple deployers. Hexo will execute each deployer in order.
 
 ```yaml
 deploy:
-- type: git
-  repo:
-- type: heroku
-  repo:
+  - type: git
+    repo:
+  - type: heroku
+    repo:
 ```
 
 Refer to the [Plugins](https://hexo.io/plugins/) list for more deployment plugins.
@@ -47,17 +47,17 @@ deploy:
   message: [message]
 ```
 
-Option | Description | Default
---- | --- | ---
-`repo` | URL of the target repository |
-`branch` | Branch name. | `gh-pages` (GitHub)<br>`coding-pages` (Coding.net)<br>`master` (others)
-`message` | Customize commit message. | `Site updated: {% raw %}{{ now('YYYY-MM-DD HH:mm:ss') }}{% endraw %}`
-`token` | Optional token value to authenticate with the repo. Prefix with `$` to read token from environment variable
+| Option    | Description                                                                                                 | Default                                                                 |
+| --------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `repo`    | URL of the target repository                                                                                |
+| `branch`  | Branch name.                                                                                                | `gh-pages` (GitHub)<br>`coding-pages` (Coding.net)<br>`master` (others) |
+| `message` | Customize commit message.                                                                                   | `Site updated: {% raw %}{{ now('YYYY-MM-DD HH:mm:ss') }}{% endraw %}`   |
+| `token`   | Optional token value to authenticate with the repo. Prefix with `$` to read token from environment variable |
 
 3. Deploy your site `hexo clean && hexo deploy`.
 
-  - You will be prompted with username and password of the target repository, unless you authenticate with a token or ssh key.
-  - hexo-deployer-git does not store your username and password. Use [git-credential-cache](https://git-scm.com/docs/git-credential-cache) to store them temporarily.
+- You will be prompted with username and password of the target repository, unless you authenticate with a token or ssh key.
+- hexo-deployer-git does not store your username and password. Use [git-credential-cache](https://git-scm.com/docs/git-credential-cache) to store them temporarily.
 
 4. Navigate to your repository settings and change the "Pages" branch to `gh-pages` (or the branch specified in your config). The deployed site should be live on the link shown on the "Pages" setting.
 
@@ -127,6 +127,10 @@ deploy:
 
 ## OpenShift
 
+{% note warn %}
+`hexo-deployer-openshift` has been deprecated in 2022.
+{% endnote %}
+
 Install [hexo-deployer-openshift].
 
 ```bash
@@ -165,21 +169,19 @@ deploy:
   pass: <password>
   remote: [remote]
   port: [port]
-  ignore: [ignore]
-  connections: [connections]
+  clear: [true|false]
   verbose: [true|false]
 ```
 
-| Option        | Description                               | Default |
-| ------------- | ----------------------------------------- | ------- |
-| `host`        | Address of remote host                    |
-| `user`        | Username                                  |
-| `pass`        | Password                                  |
-| `remote`      | Root directory of remote host             | `/`     |
-| `port`        | Port                                      | 21      |
-| `ignore`      | Ignore the files on either host or remote |
-| `connections` | Connections number                        | 1       |
-| `verbose`     | Display verbose messages                  | false   |
+| Option    | Description                                                              | Default |
+| --------- | ------------------------------------------------------------------------ | ------- |
+| `host`    | Address of remote host                                                   |
+| `user`    | Username                                                                 |
+| `pass`    | Password                                                                 |
+| `remote`  | Root directory of remote host                                            | `/`     |
+| `port`    | Port                                                                     | 21      |
+| `clear`   | Remove all files and directories from the remote directory before upload | false   |
+| `verbose` | Display verbose messages                                                 | false   |
 
 ## SFTP
 
@@ -215,11 +217,11 @@ deploy:
 | `agent`       | Path to the ssh-agent socket                    | `$SSH_AUTH_SOCK` |
 | `remotePath`  | Root directory of remote host                   | `/`              |
 | `forceUpload` | Override existing files                         | false            |
-| `concurrency` | Max number of SFTP tasks processed concurrently | 100            |
+| `concurrency` | Max number of SFTP tasks processed concurrently | 100              |
 
 ## Vercel
 
-[Vercel](https://vercel.com) is a cloud platform that enables developers to host Jamstack websites and web services that deploy instantly, scale automatically, and requires no supervision, all with zero configuration. They provide a global edge network, SSL encryption, asset compression, cache invalidation, and more.
+[Vercel](https://vercel.com) is a cloud platform that enables developers to host Jamstack websites and web services that deploy instantly, scale automatically, and require no supervision, all with zero configuration. They provide a global edge network, SSL encryption, asset compression, cache invalidation, and more.
 
 Step 1: Add a build script to your `package.json` file:
 
@@ -245,7 +247,7 @@ Alternatively, you can click the deploy button below to create a new project:
 
 ## Bip
 
-[Bip](https://bip.sh) is a commercial hosting service which provides zero downtime deployment, a global CDN, SSL, unlimited bandwidth and more for static websites. Plans are available on a pay as you go, per domain basis.
+[Bip](https://bip.sh) is a commercial hosting service that provides zero downtime deployment, a global CDN, SSL, unlimited bandwidth and more for static websites. Plans are available on a pay as you go, per domain basis.
 
 Getting started is quick and easy, as Bip provides out the box support for Hexo. This guide assumes you already have [a Bip domain and Bip CLI installed](https://bip.sh/getstarted).
 
@@ -267,14 +269,18 @@ After a few moments, your website will be deployed.
 
 ## RSS3
 
+{% note warn %}
+`hexo-deployer-rss3` has been deprecated in 2023.
+{% endnote %}
+
 [RSS3](https://rss3.io) is an open protocol designed for content and social networks in the Web 3.0 era.
 
 1. Install [hexo-deployer-rss3].
 
 2. Modify the configuration.
 
-  ``` yaml
-  deploy: # The root configuration block for all deployers
+```yaml
+deploy: # The root configuration block for all deployers
   - type: rss3
     endpoint: https://hub.rss3.io
     privateKey: 47e18d6c386898b424025cd9db446f779ef24ad33a26c499c87bb3d9372540ba
@@ -284,15 +290,15 @@ After a few moments, your website will be deployed.
       api:
         key: d693df715d3631e489d6
         secret: ee8b74626f12b61c1a4bde3b8c331ad390567c86ba779c9b18561ee92c1cbff0
-  ```
+```
 
-| Parameters | Description |
-| ----------------- | ---------------------- |
-| `endpoint` | a link to the RSS3 Hub |
-| `privateKey` | your private key, 64 bytes |
-| `ipfs/deploy` | whether to deploy to IPFS |
-| `ipfs/gateway` | IPFS API gateway |
-| `ipfs/api/key` | IPFS gateway-related authentication content |
+| Parameters        | Description                                 |
+| ----------------- | ------------------------------------------- |
+| `endpoint`        | a link to the RSS3 Hub                      |
+| `privateKey`      | your private key, 64 bytes                  |
+| `ipfs/deploy`     | whether to deploy to IPFS                   |
+| `ipfs/gateway`    | IPFS API gateway                            |
+| `ipfs/api/key`    | IPFS gateway-related authentication content |
 | `ipfs/api/secret` | IPFS gateway-related authentication content |
 
 3. generate static files
